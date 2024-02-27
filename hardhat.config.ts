@@ -15,6 +15,7 @@ module.exports = {
   solidity: "0.8.24",
   networks: {
     hardhat: {
+      
       forking: {
         url: ALCHEMY_MAINNET_API_KEY_URL,
       }
@@ -27,7 +28,16 @@ module.exports = {
       url: ALCHEMY_MUMBAI_API_KEY_URL,
       accounts: [ACCOUNT_PRIVATE_KEY],
     }
+    
+    
   },
+
+  etherscan: {
+    apiKey: {
+      sepolia: ACCOUNT_PRIVATE_KEY
+    }
+  },
+  
   lockGasLimit: 200000000000,
   gasPrice: 10000000000,
 };
