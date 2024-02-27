@@ -5,17 +5,18 @@
 
  contract Factory{
     address [] public Posts;
-    uint Postcount;
+    uint public Postcount;
 
     event PostCreated(address _post);
 
     function createPost( string calldata _uri) internal returns(address){
+        Postcount +=1;
+
         D4n13lNFT post = new D4n13lNFT(msg.sender, Postcount, _uri);
 
         Posts.push(address(post));
 
-        Postcount +=1;
-
+        
         emit PostCreated(address(post));
 
         return address(post);
