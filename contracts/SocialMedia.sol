@@ -44,6 +44,13 @@ contract SocialMediaPlatform is Factory{
 
     Group [] groups;
 
+    event userRegistered(address user, string name);
+    event GroupCreated (string _groupname, uint groupid);
+    event JoinedGroup (string _name, address user, string GroupName, uint groupid);
+    event createdPost (address user, uint postid);
+    event CreatedGroupPost (uint groupid, address user, uint postid);
+    event Commented(address user, uint postid);
+
     function userRegistriation(string calldata _name, uint _age) external {
         require(userRegistrationStatus[msg.sender] == false, "You have an account already");
 
@@ -55,7 +62,7 @@ contract SocialMediaPlatform is Factory{
 
         userRegistrationStatus[msg.sender] = true;
 
-
+        emit userRegistered(msg.sender, _name);
     }
 
     function createGroup(string memory _groupName, string memory _description) external {
@@ -74,6 +81,8 @@ contract SocialMediaPlatform is Factory{
 
         groupMembers[groupid][msg.sender] = true; 
 
+        emit GroupCreated(_groupName, groupid);
+
         
     }
 
@@ -84,6 +93,11 @@ contract SocialMediaPlatform is Factory{
         groupMembers[_groupID][msg.sender] = true; 
 
         groupList[_groupID].groupMembers.push(msg.sender);
+
+        string memory _name = registeredUsers[msg.sender].name;
+        string memory GroupName = groupList[_groupID].name;
+
+        emit JoinedGroup(_name, msg.sender, GroupName, _groupID);
     }
 
     function createNewPost(string calldata _postURI) external {
@@ -95,6 +109,8 @@ contract SocialMediaPlatform is Factory{
        postid += 1;
 
         comments[postid].post = newPost;
+
+        emit createdPost(msg.sender, postid);
 
 
     }
@@ -112,6 +128,8 @@ contract SocialMediaPlatform is Factory{
 
         comments[postid].post = newPost;
 
+        emit CreatedGroupPost(_groupID, msg.sender, postid);
+
     }
 
     function comment (uint _postid, string memory _comment) external {
@@ -121,11 +139,18 @@ contract SocialMediaPlatform is Factory{
 
         comments[_postid].comments.push(_comment);
 
+        emit Commented(msg.sender, _postid);
+
     }
 
     function getGroups() external view returns (Group [] memory){
         require(userRegistrationStatus[msg.sender] == true, "You are not registered");
         return groups;
+    }
+
+    function getAllPosts() external view returns(address [] memory){
+        require(userRegistrationStatus[msg.sender] == true, "You are not registered");
+        return Posts;
     }
 
     function getGroupPosts(uint _groupid) external view returns(address [] memory){
