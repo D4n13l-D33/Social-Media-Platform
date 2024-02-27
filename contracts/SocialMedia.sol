@@ -22,6 +22,14 @@ contract SocialMediaPlatform is Factory{
         address [] groupMembers;
     }
 
+    uint postid;
+
+    struct post{
+        address post;
+        string [] comments;
+        
+    }
+
     mapping (address => Users) registeredUsers;
 
     mapping (address => bool) userRegistrationStatus;
@@ -31,6 +39,8 @@ contract SocialMediaPlatform is Factory{
     mapping (uint => bool) createdGroups;
 
     mapping (uint => mapping(address => bool)) groupMembers;
+
+    mapping(uint => post) comments;
 
     Group [] groups;
 
@@ -43,11 +53,15 @@ contract SocialMediaPlatform is Factory{
         userReg.age = _age;
         userReg.UserAddress = msg.sender;
 
+        userRegistrationStatus[msg.sender] = true;
+
 
     }
 
-    function createGroup(string calldata _groupName, string calldata _description) external {
+    function createGroup(string memory _groupName, string memory _description) external {
         require(userRegistrationStatus[msg.sender] == true, "You are not registered");
+        
+        groupid += 1;
 
         Group storage newGroup = groupList[groupid];
         newGroup.name = _groupName;
@@ -58,7 +72,9 @@ contract SocialMediaPlatform is Factory{
 
         createdGroups[groupid] = true;
 
-        groupid += 1;
+        groupMembers[groupid][msg.sender] = true; 
+
+        
     }
 
     function joinGroup (uint _groupID) external {
@@ -75,6 +91,12 @@ contract SocialMediaPlatform is Factory{
        address newPost = createPost(_postURI);
 
        registeredUsers[msg.sender].postCreated.push(newPost);
+       
+       postid += 1;
+
+        comments[postid].post = newPost;
+
+
     }
 
     function createGroupPost(string calldata _postURI, uint _groupID) external {
@@ -86,7 +108,39 @@ contract SocialMediaPlatform is Factory{
 
         groupList[_groupID].groupPosts.push(newPost);
 
+        postid += 1;
+
+        comments[postid].post = newPost;
+
     }
+
+    function comment (uint _postid, string memory _comment) external {
+        require(userRegistrationStatus[msg.sender] == true, "You are not registered");
+        require(_postid > 0, "Invalid Post ID");
+        require(_postid <= postid, "Invalid Post ID");
+
+        comments[_postid].comments.push(_comment);
+
+    }
+
+    function getGroups() external view returns (Group [] memory){
+        require(userRegistrationStatus[msg.sender] == true, "You are not registered");
+        return groups;
+    }
+
+    function getGroupPosts(uint _groupid) external view returns(address [] memory){
+        require(userRegistrationStatus[msg.sender] == true, "You are not registered");
+        require(createdGroups[_groupid]==true, "Invalid Group ID");
+        require(groupMembers[_groupid][msg.sender] == true, "You are not a member of this group");
+
+        return groupList[_groupid].groupPosts;
+    }
+
+    function getComment(uint _postid) external view returns (string [] memory){
+        require(userRegistrationStatus[msg.sender] == true, "You are not registered");
+        return comments[_postid].comments;
+    }
+
 
 
 }
